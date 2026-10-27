@@ -55,6 +55,7 @@
     s.sections = [];
     function flush() {
       if (cur === null) summary = buf.slice();
+      else if (cur === 'picture') s.picture = buf.join('\n').trim();
       else s.sections.push({ name: cur, text: buf.join('\n').trim() });
       buf = [];
     }
@@ -73,8 +74,9 @@
       s.title = (t.shift() || '').replace(/^#+\s*/, '');
       sum = t.join('\n');
     }
-    // the first picture in the summary is the entry's portrait
-    var pm = /(^|\n)(```pic[^\n]*\n[\s\S]*?\n```)[ \t]*(\n|$)/.exec(sum);
+    // the portrait lives in "## picture"; older entries kept it in the
+    // summary, and saving moves it to the end
+    var pm = !s.picture && /(^|\n)(```pic[^\n]*\n[\s\S]*?\n```)[ \t]*(\n|$)/.exec(sum);
     if (pm) { s.picture = pm[2]; sum = sum.replace(pm[2], ''); }
     s.summary = sum.replace(/\n{3,}/g, '\n\n').trim();
     return s;
@@ -86,11 +88,12 @@
     s.extra.forEach(function (kv) { out.push(kv[0] + ': ' + kv[1]); });
     out.push('');
     if (s.summary.trim()) out.push(s.summary.trim(), '');
-    if (s.picture) out.push(s.picture, '');
     s.sections.forEach(function (sec) {
-      if (!sec.name.trim() || !sec.text.trim()) return;
+      if (!sec.name.trim() || !sec.text.trim() || sec.name.trim().toLowerCase() === 'picture') return;
       out.push('## ' + sec.name.trim().toLowerCase(), sec.text.trim(), '');
     });
+    // the picture goes last, so the text stays on top of the file
+    if (s.picture) out.push('## picture', s.picture, '');
     return out.join('\n').replace(/\n+$/, '') + '\n';
   }
 

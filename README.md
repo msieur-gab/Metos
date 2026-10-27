@@ -103,7 +103,7 @@ Markdown keeps drawings possible, at two levels:
 
 A photo can become a picture that lives inside the entry, as text, and shows on any device.
 
-In the browser, use **add picture** (or drop a photo on the page). Choose framing, width, colours and shading, write a caption, then **Add to entry** to see it in the card, and **Download entry** to keep the updated `.md` in `kb/`.
+In the browser, use **add picture** (or drop a photo on the page). Choose framing, width, colours, tone (colour, or grey from black to white: 2 greys dithered gives pure black and white dots) and shading, write a caption, then **Add to entry** to see it in the card, and **Download entry** to keep the updated `.md` in `kb/`.
 
 The result is a ```` ```pic ```` block:
 
@@ -132,7 +132,7 @@ Each target shows what it can:
 | any text display | the raw rows, which read as rough ASCII art because characters follow brightness |
 | C or Forth with a screen | read the palette, then paint one pixel per character |
 
-A picture placed in the summary (where **Add to entry** puts it) is the entry's portrait and shows on every card for that entry. Its caption stays searchable; its pixels do not.
+**Add to entry** puts the picture last, in a `## picture` section, so the text stays on top of the file. That picture is the entry's portrait: the browser shows it on every card for that entry, the terminal when it opens the entry. Adding a new picture replaces it. Its caption stays searchable; its pixels do not.
 
 Sizes for scale: 48 px wide is about 2.5 KB of text, 96 px about 10 KB. Bright colours like yellow look pale in the raw text, because only brightness survives there.
 

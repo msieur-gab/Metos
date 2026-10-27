@@ -120,8 +120,20 @@
   function picToImg(text, caption) {
     var p = window.metosPic && metosPic.parse(text);
     if (!p) return null;
-    return '<figure class="pic"><img src="' + picToCanvas(p).toDataURL() + '" alt="' + esc(caption || 'picture') +
-      '" style="aspect-ratio:' + p.w + '/' + p.h + '">' + (caption ? '<figcaption>' + esc(caption) + '</figcaption>' : '') + '</figure>';
+    return '<figure class="pic" data-w="' + p.w + '" title="Tap to switch between picture and text">' +
+      '<img src="' + picToCanvas(p).toDataURL() + '" alt="' + esc(caption || 'picture') +
+      '" style="aspect-ratio:' + p.w + '/' + p.h + '"><pre class="raw">' + esc(p.rows.join('\n')) + '</pre>' +
+      (caption ? '<figcaption>' + esc(caption) + '</figcaption>' : '') + '</figure>';
+  }
+
+  // Tapping a picture shows its raw characters, as a screen with no graphics
+  // would, and tapping again shows the picture.
+  function togglePic(fig) {
+    var pre = fig.querySelector('pre.raw');
+    if (!pre) return;
+    fig.classList.toggle('text');
+    // Departure Mono characters are 0.636 em wide: fit the row to the box
+    if (fig.classList.contains('text')) pre.style.fontSize = ((pre.clientWidth - 8) / (+fig.dataset.w * 0.636)) + 'px';
   }
 
   function md(text) {
@@ -213,14 +225,14 @@
     if (r.section !== 'summary') card.appendChild(el('div', 'sec', esc(r.section)));
     if (e.warn) card.appendChild(el('div', 'warn', esc(e.warn)));
     if (r.missing) card.appendChild(el('p', 'note', 'This entry has nothing on “' + esc(r.missing) + '”. Here is the summary.'));
-    // A picture in the summary is the entry's portrait: show it on every card.
-    var portrait = r.section !== 'summary' && /(^|\n)(```pic[^\n]*\n[\s\S]*?\n```)/.exec(e.sections.summary || '');
-    if (portrait) card.appendChild(el('div', 'body', md(portrait[2])));
+    // The "## picture" section, at the end of the file, is the entry's
+    // portrait: show it on every card.
+    if (e.sections.picture && r.section !== 'picture') card.appendChild(el('div', 'body', md(e.sections.picture)));
     card.appendChild(el('div', 'body', md(r.text)));
 
     var chips = el('div', 'chips');
     e.order.forEach(function (s) {
-      if (s === r.section) return;
+      if (s === r.section || s === 'picture') return;
       chips.appendChild(chip(s, function () { show(metos.open(kb, e.id, s), e.title + ' / ' + s); }));
     });
     e.see.forEach(function (id) {
@@ -331,16 +343,17 @@
 
   // Put the picture block at the end of the entry's summary, so it becomes
   // the entry's portrait.
+  // The picture goes last, in its own "## picture" section, so the text stays
+  // on top for whoever reads the file. A new picture replaces the old one.
   function insertPic(text, block) {
-    var lines = text.replace(/\r/g, '').split('\n'), inCode = false, at = lines.length, pastHead = false;
+    var lines = text.replace(/\r/g, '').split('\n'), out = [], inCode = false, skip = false;
     for (var i = 0; i < lines.length; i++) {
-      if (!pastHead) { if (!lines[i].trim()) pastHead = true; continue; }
       if (/^```/.test(lines[i])) inCode = !inCode;
-      if (!inCode && /^##\s/.test(lines[i])) { at = i; break; }
+      if (!inCode && /^##\s/.test(lines[i])) skip = /^##\s+picture\s*$/i.test(lines[i]);
+      if (!skip) out.push(lines[i]);
     }
-    while (at > 0 && !lines[at - 1].trim()) at--;
-    lines.splice(at, 0, '', block);
-    return lines.join('\n').replace(/\n{3,}/g, '\n\n');
+    while (out.length && !out[out.length - 1].trim()) out.pop();
+    return out.join('\n') + '\n\n## picture\n' + block + '\n';
   }
 
   function download(name, text) {
@@ -380,6 +393,7 @@
       var frame = select('pic-frame', 'Framing', Object.keys(FRAMES).map(function (k) { return [k, FRAMES[k].label]; }), 'square');
       var width = select('pic-width', 'Width', [[48, '48 px'], [64, '64 px'], [96, '96 px'], [128, '128 px']], 96);
       var colours = select('pic-colours', 'Colours', [[16, '16'], [8, '8'], [4, '4'], [2, '2']], 16);
+      var tone = select('pic-tone', 'Tone', [['0', 'Colour'], ['1', 'Grey']], '0');
       var dither = select('pic-dither', 'Shading', [['0', 'Flat'], ['1', 'Dithered']], '0');
       var entry = opts.onUse ? null : select('pic-entry', 'Entry', kb.entries.map(function (e) { return [e.id, e.title]; }).sort(function (a, b) { return a[1].localeCompare(b[1]); }), guessEntry(file.name));
       var capWrap = el('label', 'wide', '<span>Caption</span>');
@@ -403,7 +417,7 @@
       var block = '';
       function update() {
         var s = sample(img, frame.value, +width.value);
-        var text = metosPic.encode(s.rgba, s.w, s.h, { colors: +colours.value, dither: dither.value === '1' });
+        var text = metosPic.encode(s.rgba, s.w, s.h, { colors: +colours.value, dither: dither.value === '1', grey: tone.value === '1' });
         var p = metosPic.parse(text);
         colourView.innerHTML = '';
         var shown = picToCanvas(p);
@@ -419,7 +433,7 @@
         size.textContent = 'Right: the same picture as raw text, as a device with no graphics shows it. ' +
           p.w + ' × ' + p.h + ' px, ' + Object.keys(p.colors).length + ' colours, ' + block.length.toLocaleString() + ' characters.';
       }
-      [frame, width, colours, dither].forEach(function (s) { s.addEventListener('change', update); });
+      [frame, width, colours, tone, dither].forEach(function (s) { s.addEventListener('change', update); });
       caption.addEventListener('input', function () { block = block.replace(/^```pic[^\n]*/, '```pic ' + caption.value.trim()); });
       update();
 
@@ -448,7 +462,7 @@
       actions.appendChild(chip('Download entry', function () {
         var id = entry.value, f = files.filter(function (x) { return x.name.replace(/\.[^.]+$/, '') === id; })[0];
         if (!f) return;
-        download(f.name, /```pic/.test(f.text) ? f.text : insertPic(f.text, block));
+        download(f.name, insertPic(f.text, block));
       }));
       actions.appendChild(chip('Copy text', function (ev) {
         var btn = ev.target;
@@ -486,6 +500,11 @@
   }
 
   // ---- wiring --------------------------------------------------------------
+
+  log.addEventListener('click', function (ev) {
+    var fig = ev.target.closest && ev.target.closest('.card figure.pic');
+    if (fig) togglePic(fig);
+  });
 
   document.getElementById('ask').addEventListener('submit', function (ev) {
     ev.preventDefault();

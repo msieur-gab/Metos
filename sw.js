@@ -1,6 +1,6 @@
 // Keeps metos working offline once it has been opened over http(s).
 // Bump the version after changing files so phones pick up the new ones.
-var CACHE = 'metos-v4';
+var CACHE = 'metos-v5';
 var FILES = ['./', 'index.html', 'app.js', 'engine.js', 'pic.js', 'editor.js', 'kb.js', 'manifest.json', 'fonts/departure-mono.css', 'kb/img/fire-lay.svg'];
 
 self.addEventListener('install', function (e) {
@@ -16,10 +16,12 @@ self.addEventListener('activate', function (e) {
 });
 
 // Network first, so a rebuilt kb.js shows up; cache when offline.
+// 'no-cache' asks the server each time, so the browser's own HTTP cache
+// cannot hand back a stale file.
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(function (res) {
+    fetch(e.request, { cache: 'no-cache' }).then(function (res) {
       var copy = res.clone();
       caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
       return res;

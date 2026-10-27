@@ -31,7 +31,7 @@ Pipeline: decode (the browser reads any format) → crop (whole, centre square, 
 
 ## Placement
 
-A picture in the summary is the entry's portrait and shows on every card for that entry. Its caption is searchable; its pixels are excluded from search. Every picture needs a caption that works without the picture.
+The picture goes last in the entry, in a `## picture` section, so the text stays on top of the file. It is the entry's portrait and shows on every card for that entry; tap it to see its raw characters. Its caption is searchable; its pixels are excluded from search. Every picture needs a caption that works without the picture.
 
 ## Other levels, still useful
 

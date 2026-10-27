@@ -106,14 +106,23 @@
 
   // ---- encoding ------------------------------------------------------------
 
-  // rgba: pixels already at the final size. opts.colors (2..16), opts.dither.
+  // rgba: pixels already at the final size. opts.colors (2..16), opts.dither,
+  // opts.grey (evenly spaced greys from black to white: 2 gives pure black
+  // and white).
   function encode(rgba, w, h, opts) {
     opts = opts || {};
     var n = Math.max(2, Math.min(16, opts.colors || 16));
     var pixels = [];
     for (var i = 0; i < w * h; i++) pixels.push([rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2]]);
 
-    var pal = refine(pixels, medianCut(pixels, n), 4);
+    var pal;
+    if (opts.grey) {
+      pixels = pixels.map(function (p) { var v = Math.round(luma(p)); return [v, v, v]; });
+      pal = [];
+      for (var g = 0; g < n; g++) { var v = Math.round(g * 255 / (n - 1)); pal.push([v, v, v]); }
+    } else {
+      pal = refine(pixels, medianCut(pixels, n), 4);
+    }
     // remove duplicates, sort darkest first so characters follow brightness
     var seen = {};
     pal = pal.filter(function (c) { var k = c.join(','); if (seen[k]) return false; seen[k] = 1; return true; });

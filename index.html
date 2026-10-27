@@ -90,10 +90,15 @@
   .tool .views figcaption { font-size: 11px; color: var(--muted); margin-top: 4px; }
   /* raw view: one character per pixel, line height matched to character
      width so the picture keeps its proportions */
-  .tool pre.raw {
+  pre.raw {
     margin: 0; min-width: 0; overflow: hidden; font-family: var(--mono); line-height: 0.636; letter-spacing: 0;
     background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 4px;
   }
+  /* in a card, a picture switches between pixels and characters on tap */
+  figure.pic[data-w] { cursor: pointer; }
+  figure.pic pre.raw { display: none; max-width: 420px; }
+  figure.pic.text pre.raw { display: block; }
+  figure.pic.text img { display: none; }
   .copybox { width: 100%; height: 120px; margin-top: 10px; font: 11px var(--mono); }
 
   /* entry editor: a full-screen sheet over the conversation */

@@ -63,8 +63,10 @@ function render(r, why) {
     if (r.entry.warn) out.push('! ' + r.entry.warn);
     if (r.missing) out.push('(This entry has nothing on "' + r.missing + '". Here is the summary.)');
     out.push('');
+    // the portrait is tall in a terminal: show it only when opening the entry
+    if (r.section === 'summary' && r.entry.sections.picture) out.push(plain(r.entry.sections.picture), '');
     out.push(plain(r.text));
-    var more = r.entry.order.filter(function (s) { return s !== r.section; });
+    var more = r.entry.order.filter(function (s) { return s !== r.section && s !== 'picture'; });
     if (more.length) out.push('\nalso: ' + more.join(', '));
     if (r.entry.see.length) out.push('see: ' + r.entry.see.join(', '));
     if (r.entry.source) out.push('source: ' + r.entry.source);
