@@ -295,14 +295,38 @@
     p.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
+  // The shortcuts live in the bottom bar, above the ask field, so they stay
+  // in reach however far the answers scroll.
   function intro() {
     var box = el('div', 'intro');
     box.appendChild(el('p', null, 'A small knowledge base you can ask in plain words. It only shows what its entries say, and tells you when it doesn’t know.'));
-    var chips = el('div', 'chips');
-    EXAMPLES.forEach(function (q) { chips.appendChild(chip(q, function () { ask(q); })); });
-    box.appendChild(chips);
     log.appendChild(box);
+    var shortcuts = document.getElementById('shortcuts');
+    if (shortcuts) {
+      shortcuts.innerHTML = '';
+      EXAMPLES.forEach(function (q) { shortcuts.appendChild(chip(q, function () { ask(q); })); });
+    }
   }
+
+  // Keep the last answer clear of the bottom bar, whatever its height.
+  function fitBottom() {
+    var bar = document.getElementById('ask');
+    if (bar) document.documentElement.style.setProperty('--bottom-h', (bar.offsetHeight + 24) + 'px');
+  }
+  window.addEventListener('resize', fitBottom);
+
+  // Invert: swap ink and paper, and remember the choice on this device.
+  (function () {
+    var root = document.documentElement, btn = document.getElementById('invert');
+    try { var saved = localStorage.getItem('metos-theme'); if (saved) root.dataset.theme = saved; } catch (e) {}
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var dark = root.dataset.theme ? root.dataset.theme === 'dark'
+        : window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+      root.dataset.theme = dark ? 'light' : 'dark';
+      try { localStorage.setItem('metos-theme', root.dataset.theme); } catch (e) {}
+    });
+  })();
 
   function ask(q) {
     q = q.trim();
@@ -574,6 +598,7 @@
     rebuild();
     if (server) countEl.textContent += ' · on this stick';
     intro();
+    fitBottom();
     if (!files.length) say('note', 'No entries loaded. Use “open folder” to pick the kb folder, or run build.js.');
     input.focus();
   }
