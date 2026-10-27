@@ -29,7 +29,7 @@ rm -rf dist
 mkdir -p "$OUT"
 
 # the app, as plain files (also the no-program fallback)
-cp index.html app.js engine.js pic.js editor.js kb.js manifest.json sw.js vocab.txt CONTENTS.md "$OUT/"
+cp index.html skin.css app.js engine.js pic.js editor.js kb.js manifest.json sw.js vocab.txt CONTENTS.md "$OUT/"
 cp -R fonts kb "$OUT/"
 cp server/READ-ME-FIRST.txt "$OUT/"
 

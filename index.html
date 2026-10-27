@@ -24,7 +24,7 @@
     --serif: var(--mono); /* one face everywhere: Departure Mono, crisp at 11, 16.5 and 22 px */
   }
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --paper: #1b1a17;
       --card: #24221e;
       --ink: #e9e3d6;
@@ -38,6 +38,20 @@
       --ok-bg: #26301c;
     }
   }
+  /* the invert switch overrides the system setting both ways */
+  :root[data-theme="dark"] {
+    --paper: #1b1a17;
+    --card: #24221e;
+    --ink: #e9e3d6;
+    --muted: #9a9183;
+    --line: #3a362f;
+    --accent: #a9bb7c;
+    --warn-bg: #3a2418;
+    --warn-ink: #f0b48f;
+    --code: #2c2924;
+    --ok: #b7d39a;
+    --ok-bg: #26301c;
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--paper); color: var(--ink); }
   /* a single-weight pixel face: never fake bold or italic */
@@ -45,7 +59,8 @@
   body { font-family: var(--serif); font-size: 16.5px; line-height: 1.5; }
   .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; }
 
-  header { padding: 20px 0 8px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  /* the menu stays at the top while answers scroll */
+  header { position: sticky; top: 0; z-index: 5; background: var(--paper); padding: 20px 0 8px; padding-top: max(20px, env(safe-area-inset-top, 0px)); display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   h1 { font-family: var(--mono); font-size: 22px; font-weight: 600; margin: 0; letter-spacing: 0.02em; }
   h1 small { font-weight: 400; color: var(--muted); font-size: 11px; margin-left: 8px; letter-spacing: 0; }
   .tools { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--mono); font-size: 11px; }
@@ -56,7 +71,7 @@
   .tools label:hover, .tools button:hover { color: var(--ink); border-color: var(--muted); }
   .tools input { display: none; }
 
-  #log { padding: 8px 0 140px; }
+  #log { padding: 8px 0 var(--bottom-h, 140px); }
   .q { font-family: var(--mono); font-size: 16.5px; color: var(--muted); margin: 24px 0 8px; }
   .q::before { content: "> "; color: var(--accent); }
 
@@ -192,6 +207,10 @@
     border-top: 1px solid var(--line); padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
   }
   form .wrap { display: flex; gap: 8px; }
+  /* topic shortcuts: always visible, just above the ask field */
+  #shortcuts { margin: 0 auto 10px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  #shortcuts::-webkit-scrollbar { display: none; }
+  #shortcuts .chip { flex: none; }
   #q {
     flex: 1; font: 16.5px var(--mono); padding: 10px 12px; color: var(--ink);
     background: var(--card); border: 1px solid var(--line); border-radius: 6px;
@@ -200,6 +219,7 @@
   form button { font: 16.5px var(--mono); padding: 0 16px; border: 0; border-radius: 6px; background: var(--accent); color: var(--paper); cursor: pointer; }
   .drop { outline: 2px dashed var(--accent); outline-offset: -8px; }
 </style>
+<link rel="stylesheet" href="skin.css">
 </head>
 <body>
   <div class="wrap">
@@ -210,12 +230,14 @@
         <label title="Add .md or .txt entries">add entries<input id="files" type="file" accept=".md,.txt,text/markdown,text/plain" multiple></label>
         <label title="Turn a photo into a picture any device can show">add picture<input id="photo" type="file" accept="image/*"></label>
         <button id="new-entry" type="button" title="Write a new entry by hand">new entry</button>
+        <button id="invert" type="button" title="Swap ink and paper">◐ invert</button>
       </div>
     </header>
     <div id="log"></div>
   </div>
 
   <form id="ask" autocomplete="off">
+    <div id="shortcuts" class="chips wrap" aria-label="Topics"></div>
     <div class="wrap">
       <input id="q" type="text" placeholder="Ask, e.g. how do I make water safe" aria-label="Question">
       <button type="submit">ask</button>
