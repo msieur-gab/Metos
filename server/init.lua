@@ -125,4 +125,5 @@ do
   pcall(writeContents, b)
 end
 
-LaunchBrowser('/')
+-- A launcher that opens its own app window sets METOS_NO_BROWSER=1.
+if os.getenv('METOS_NO_BROWSER') ~= '1' then LaunchBrowser('/') end

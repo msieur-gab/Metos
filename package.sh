@@ -32,6 +32,9 @@ mkdir -p "$OUT"
 cp index.html skin.css app.js engine.js pic.js editor.js kb.js manifest.json sw.js vocab.txt CONTENTS.md "$OUT/"
 cp -R fonts kb "$OUT/"
 cp server/READ-ME-FIRST.txt "$OUT/"
+# Linux: double-click launcher, opens metos in an app window
+cp server/start-linux.sh server/metos.desktop "$OUT/"
+chmod +x "$OUT/start-linux.sh" "$OUT/metos.desktop"
 
 # metos.com = redbean + the metos server script inside its zip
 cp "$REDBEAN" "$OUT/metos.com"

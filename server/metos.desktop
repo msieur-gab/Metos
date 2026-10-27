@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=metos
+Comment=Offline knowledge base: ask in plain words
+Exec=sh -c "d=\\$(dirname \\"\\$1\\"); [ -f \\"\\$d/start-linux.sh\\" ] || for d in /media/*/*/METOS /run/media/*/*/METOS; do [ -f \\"\\$d/start-linux.sh\\" ] && break; done; exec bash \\"\\$d/start-linux.sh\\"" sh %k
+Icon=accessories-dictionary
+Terminal=false
