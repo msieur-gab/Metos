@@ -192,16 +192,34 @@
   }
 
   // RGBA buffer, for a canvas or a framebuffer
-  function toRGBA(pic) {
+  // clear: a character drawn transparent (see paper), or none.
+  function toRGBA(pic, clear) {
     var out = new Uint8ClampedArray(pic.w * pic.h * 4), grey = [128, 128, 128];
     for (var y = 0; y < pic.h; y++) {
       var row = pic.rows[y] || '';
       for (var x = 0; x < pic.w; x++) {
         var c = pic.colors[row[x]] || grey, o = (y * pic.w + x) * 4;
-        out[o] = c[0]; out[o + 1] = c[1]; out[o + 2] = c[2]; out[o + 3] = 255;
+        out[o] = c[0]; out[o + 1] = c[1]; out[o + 2] = c[2]; out[o + 3] = row[x] === clear ? 0 : 255;
       }
     }
     return out;
+  }
+
+  // The picture's own paper: the character along at least three quarters of
+  // its edges, as around a drawing or a plant shot on a plain background.
+  // Left out, the picture sits on the screen's paper in any theme. A photo
+  // that fills its frame has no such character, and stays whole.
+  function paper(pic) {
+    var count = {}, n = 0, best = null;
+    function see(ch) {
+      if (!ch || !pic.colors[ch]) return;
+      n++;
+      count[ch] = (count[ch] || 0) + 1;
+      if (!best || count[ch] > count[best]) best = ch;
+    }
+    for (var x = 0; x < pic.w; x++) { see((pic.rows[0] || '')[x]); see((pic.rows[pic.h - 1] || '')[x]); }
+    for (var y = 1; y < pic.h - 1; y++) { var r = pic.rows[y] || ''; see(r[0]); see(r[pic.w - 1]); }
+    return best && count[best] * 4 >= n * 3 ? best : null;
   }
 
   // Colour terminal: each character cell shows two pixels, top and bottom,
@@ -219,7 +237,7 @@
     return out.join('\n');
   }
 
-  var api = { RAMP: RAMP, resize: resize, encode: encode, parse: parse, toRGBA: toRGBA, toAnsi: toAnsi };
+  var api = { RAMP: RAMP, resize: resize, encode: encode, parse: parse, toRGBA: toRGBA, paper: paper, toAnsi: toAnsi };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.metosPic = api;
 })(this);

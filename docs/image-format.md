@@ -33,6 +33,8 @@ Pipeline: decode (the browser reads any format) → crop (whole, centre square, 
 
 The picture goes last in the entry, in a `## picture` section, so the text stays on top of the file. It is the entry's portrait and shows on every card for that entry; tap it to see its raw characters. Its caption is searchable; its pixels are excluded from search. Every picture needs a caption that works without the picture.
 
+On screen, a picture sits on the page's own paper: the colour along at least three quarters of its edges is its paper and is drawn transparent, so a drawing or a plant shot on a plain background has no box around it, in either theme. In dark mode the picture is inverted (hues turned back), so lines stay ink on paper. A photo that fills its frame keeps all its pixels. Only the display does this; the stored block is unchanged.
+
 ## Other levels, still useful
 
 1. **Caption**: always, works everywhere.

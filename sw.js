@@ -1,6 +1,6 @@
 // Keeps metos working offline once it has been opened over http(s).
 // Bump the version after changing files so phones pick up the new ones.
-var CACHE = 'metos-v6';
+var CACHE = 'metos-v7';
 var FILES = ['./', 'index.html', 'skin.css', 'app.js', 'engine.js', 'pic.js', 'editor.js', 'kb.js', 'manifest.json', 'fonts/departure-mono.css', 'kb/img/fire-lay.svg'];
 
 self.addEventListener('install', function (e) {

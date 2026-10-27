@@ -113,7 +113,7 @@
   function picToCanvas(p) {
     var c = document.createElement('canvas');
     c.width = p.w; c.height = p.h;
-    c.getContext('2d').putImageData(new ImageData(metosPic.toRGBA(p), p.w, p.h), 0, 0);
+    c.getContext('2d').putImageData(new ImageData(metosPic.toRGBA(p, metosPic.paper(p)), p.w, p.h), 0, 0);
     return c;
   }
 
