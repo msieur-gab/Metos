@@ -1,3 +1,130 @@
-/* Style layer, loaded after the base styles in index.html.
-   Each style branch (style-teletext, style-terminal) fills this file;
-   on main it is empty and the base look applies. */
+/* metos style layer: teletext / videotex (Minitel spirit).
+   Full-width bands, tall titles, capitals, rows of equal keys, an ASK line
+   with SEND. Four tones only (ink, dark grey, light grey, paper); dark mode
+   and the invert switch swap them. Pictures show in grey and become a
+   light silhouette when inverted; the stored colours are untouched. */
+:root { --ink: #000; --g2: #555; --g1: #aaa; --paper: #fff; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --ink: #fff; --g2: #aaa; --g1: #555; --paper: #000; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --ink: #fff; --g2: #aaa; --g1: #555; --paper: #000; color-scheme: dark; }
+:root, :root[data-theme] {
+  --card: var(--paper); --muted: var(--g2); --line: var(--ink); --accent: var(--ink);
+  --warn-bg: var(--g1); --warn-ink: var(--ink); --code: var(--g1); --ok: var(--ink); --ok-bg: var(--g1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --card: var(--paper); --muted: var(--g2); --line: var(--ink); --accent: var(--ink); --warn-bg: var(--g1); --warn-ink: var(--ink); --code: var(--g1); --ok: var(--ink); --ok-bg: var(--g1); }
+}
+* { border-radius: 0 !important; box-shadow: none !important; }
+html, body { background: var(--paper); color: var(--ink); }
+body { font-size: 11px; line-height: 14px; }
+.wrap { max-width: 720px; }
+
+/* ---- header band and key row ---------------------------------------------- */
+header { position: sticky; top: 0; z-index: 5; margin: 0 -16px; padding: 0; background: var(--paper); display: block; }
+h1 {
+  font-size: 11px; line-height: 14px; font-weight: normal; background: var(--ink); color: var(--paper);
+  padding: 1px 16px; display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: .1em;
+}
+h1 small { color: var(--paper); font-size: 11px; }
+.tools {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px;
+  padding: 6px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--ink); font-size: 11px;
+}
+.tools label, .tools button {
+  border: 1px solid var(--ink); background: var(--paper); color: var(--ink); padding: 2px 4px;
+  text-align: center; text-transform: uppercase; letter-spacing: .06em;
+}
+.tools label:hover, .tools button:hover { background: var(--ink); color: var(--paper); }
+
+/* ---- pages ------------------------------------------------------------------ */
+#log { padding: 0 0 var(--bottom-h, 160px); }
+.intro { color: var(--ink); margin: 12px 0; }
+.intro p { text-transform: uppercase; letter-spacing: .04em; }
+.q { font-size: 11px; color: var(--g2); margin: 18px 0 0; text-transform: uppercase; letter-spacing: .06em; }
+.q::before { content: "▶ "; color: var(--ink); }
+
+.card { background: var(--paper); border: 0; padding: 0; }
+.card h2 {
+  font-size: 22px; line-height: 28px; font-weight: normal; margin: 4px 0 6px; text-transform: uppercase;
+  letter-spacing: .08em; transform: scaleY(1.5); transform-origin: top; height: 42px;
+}
+.card .sec { font-size: 11px; color: var(--g2); text-transform: uppercase; }
+.warn {
+  margin: 8px -16px; padding: 4px 16px; background: var(--g1); color: var(--ink);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+}
+.warn::before { content: "▲ "; }
+.note { font-style: normal; color: var(--g2); font-size: 11px; }
+.body p, .body li { font-size: 11px; line-height: 14px; }
+.body pre { background: var(--g1); border: 0; font-size: 11px; line-height: 14px; }
+.body figcaption, .tool .views figcaption { font-size: 11px; color: var(--g2); text-transform: uppercase; }
+figure.pic img, figure.pic canvas, .body img { border: 0; background: var(--paper); }
+
+/* keys: equal boxes in capitals */
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 4px; }
+.chip, .ghost {
+  font: 11px/14px var(--mono); border: 1px solid var(--ink); background: var(--paper); color: var(--ink);
+  padding: 3px 4px; text-transform: uppercase; letter-spacing: .06em; text-align: center;
+}
+.chip:hover, .ghost:hover { background: var(--ink); color: var(--paper); }
+.chip.see { background: var(--g1); border-color: var(--g1); }
+.chip.edit { border-style: dotted; }
+.primary { font: 11px/14px var(--mono); background: var(--ink); color: var(--paper); border: 0; padding: 5px 12px; text-transform: uppercase; letter-spacing: .06em; }
+.src { color: var(--g2); text-transform: uppercase; }
+details summary { color: var(--g2); text-transform: uppercase; }
+.list li { border-bottom: 1px solid var(--g1); padding-bottom: 6px; }
+.list button { text-decoration: none; text-transform: uppercase; letter-spacing: .06em; }
+.list .first { font-size: 11px; color: var(--g2); }
+
+/* ---- bottom bar: shortcut keys, then the ASK line ------------------------ */
+form { background: var(--paper); border-top: 1px solid var(--ink); padding: 6px 0 0; }
+#shortcuts { margin: 0 auto 6px; gap: 4px; display: flex; }
+#shortcuts .chip { min-width: 0; flex: none; padding: 3px 8px; }
+form > .wrap:last-child {
+  max-width: none; background: var(--ink); align-items: center;
+  padding: 6px max(16px, calc((100% - 688px) / 2)) calc(6px + env(safe-area-inset-bottom, 0px));
+}
+form > .wrap:last-child::before { content: "ASK:"; color: var(--paper); letter-spacing: .1em; }
+#q { font: 16.5px var(--mono); background: transparent; color: var(--paper); border: 0; border-bottom: 1px dotted var(--paper); padding: 6px 4px; }
+#q::placeholder { color: var(--g1); }
+#q:focus { outline: 0; }
+form > .wrap:last-child button { background: var(--paper); color: var(--ink); border: 0; padding: 4px 10px; letter-spacing: .1em; font-size: 0; }
+form > .wrap:last-child button::after { content: "SEND"; font: 11px var(--mono); }
+
+/* ---- picture tool and editor: bands for each group ------------------------ */
+.tool label, .ed-label { font-size: 11px; color: var(--ink); text-transform: uppercase; letter-spacing: .04em; }
+.tool select, .tool input, .sheet input[type=text], .sheet textarea, .sheet select {
+  font: 11px/14px var(--mono); background: var(--paper); color: var(--ink); border: 0; border-bottom: 1px solid var(--ink);
+}
+.sheet textarea { border: 1px solid var(--ink); }
+.sheet input:focus, .sheet textarea:focus, .sheet select:focus { outline: 0; background: var(--g1); }
+pre.raw { border: 0; background: var(--paper); }
+.sheet { background: var(--paper); }
+.sheet-bar { background: var(--ink); border: 0; }
+.sheet-bar .sheet-in { padding-block: 1px; }
+.sheet-bar h2 { font-size: 11px; font-weight: normal; color: var(--paper); text-transform: uppercase; letter-spacing: .1em; }
+.sheet-bar .ghost { background: var(--paper); color: var(--ink); border: 0; }
+.ed-group { border: 0; padding: 0 0 8px; }
+.ed-group legend {
+  display: block; width: 100%; font-size: 11px; background: var(--g1); color: var(--ink); padding: 2px 6px;
+  text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px;
+}
+.ed-hint { font-size: 11px; line-height: 14px; color: var(--g2); }
+.ed-panel h3 { font-size: 11px; background: var(--g1); color: var(--ink); padding: 2px 6px; letter-spacing: .1em; }
+.ed-result, .ed-checks, .ed-status { font-size: 11px; line-height: 14px; }
+.ed-result.c-ok { background: var(--paper); color: var(--ink); border-left: 6px solid var(--ink); }
+.ed-result.c-warn { background: var(--paper); color: var(--ink); border-left: 6px solid var(--g1); }
+.ed-result.c-bad { background: var(--ink); color: var(--paper); }
+.ed-checks li.c-ok, .ed-checks li.c-warn, .ed-checks li.c-bad { color: var(--ink); }
+.ed-raw pre { background: var(--g1); }
+.drop { outline: 4px solid var(--g1); }
+
+/* pictures: grey, and a light silhouette in dark mode */
+figure.pic img, figure.pic canvas, .tool .views canvas, .ed-picture img { filter: grayscale(1); }
+:root[data-theme="dark"] figure.pic img, :root[data-theme="dark"] figure.pic canvas,
+:root[data-theme="dark"] .tool .views canvas, :root[data-theme="dark"] .ed-picture img { filter: grayscale(1) invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) figure.pic img, :root:not([data-theme="light"]) figure.pic canvas,
+  :root:not([data-theme="light"]) .tool .views canvas, :root:not([data-theme="light"]) .ed-picture img { filter: grayscale(1) invert(1); }
+}
