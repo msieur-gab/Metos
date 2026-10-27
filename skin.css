@@ -1,3 +1,121 @@
-/* Style layer, loaded after the base styles in index.html.
-   Each style branch (style-teletext, style-terminal) fills this file;
-   on main it is empty and the base look applies. */
+/* metos style layer: text terminal. What a C or Forth version on a text
+   screen would look like: a character grid, double frames, inverse video,
+   bracketed words instead of buttons, numbered keys, a command line.
+   Four tones only (ink, dark grey, light grey, paper); dark mode and the
+   invert switch swap them. Pictures show in grey and become a light
+   silhouette when inverted; the stored colours are untouched. */
+:root { --ink: #000; --g2: #555; --g1: #aaa; --paper: #fff; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --ink: #fff; --g2: #aaa; --g1: #555; --paper: #000; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --ink: #fff; --g2: #aaa; --g1: #555; --paper: #000; color-scheme: dark; }
+:root, :root[data-theme] {
+  --card: var(--paper); --muted: var(--g2); --line: var(--ink); --accent: var(--ink);
+  --warn-bg: var(--ink); --warn-ink: var(--paper); --code: var(--paper); --ok: var(--ink); --ok-bg: var(--g1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --card: var(--paper); --muted: var(--g2); --line: var(--ink); --accent: var(--ink); --warn-bg: var(--ink); --warn-ink: var(--paper); --code: var(--paper); --ok: var(--ink); --ok-bg: var(--g1); }
+}
+* { border-radius: 0 !important; box-shadow: none !important; }
+html, body { background: var(--paper); color: var(--ink); }
+body { font-size: 11px; line-height: 14px; }
+.wrap { max-width: 720px; }
+
+/* ---- top line: inverse status bar, tools as numbered keys ------------- */
+header {
+  position: sticky; top: 0; z-index: 5; margin: 0 -16px; padding: 0 16px;
+  background: var(--ink); color: var(--paper); display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px;
+  counter-reset: key;
+}
+h1 { font-size: 11px; line-height: 14px; font-weight: normal; color: var(--paper); }
+h1 small { color: var(--paper); font-size: 11px; opacity: .75; }
+.tools { gap: 0 10px; font-size: 11px; margin-left: auto; }
+.tools label, .tools button {
+  border: 0; background: transparent; color: var(--paper); padding: 0; text-transform: uppercase;
+}
+.tools label::before, .tools button::before {
+  counter-increment: key; content: counter(key); background: var(--paper); color: var(--ink); padding: 0 2px; margin-right: 2px;
+}
+.tools label:hover, .tools button:hover { color: var(--paper); text-decoration: underline; }
+
+/* ---- main frame: double line, title set into the border --------------- */
+#log { margin: 14px 0 var(--bottom-h, 150px); padding: 14px 10px 10px; border: 3px double var(--ink); position: relative; }
+#log::before { content: "╡ METOS ╞"; position: absolute; top: -8px; left: 12px; background: var(--paper); padding: 0 2px; }
+.intro { color: var(--ink); margin: 0 0 8px; }
+.q { font-size: 11px; color: var(--ink); margin: 16px 0 4px; }
+.q::before { content: "C:\\> "; color: var(--ink); }
+
+.card { background: var(--paper); border: 1px solid var(--ink); padding: 8px 10px; }
+.card h2 { font-size: 11px; font-weight: normal; margin: 0 0 6px; text-transform: uppercase; }
+.card h2::before { content: "══ "; } .card h2::after { content: " ══"; }
+.card .sec { font-size: 11px; color: var(--g2); }
+.warn { background: var(--ink); color: var(--paper); padding: 2px 6px; margin: 6px 0 10px; font-size: 11px; }
+.warn::before { content: "!! "; }
+.note { font-style: normal; color: var(--g2); font-size: 11px; }
+.body p, .body li { font-size: 11px; line-height: 14px; }
+.body pre { background: var(--paper); border: 0; padding: 0; font-size: 11px; line-height: 14px; }
+.body figcaption, .tool .views figcaption { font-size: 11px; color: var(--g2); }
+figure.pic img, figure.pic canvas, .body img { border: 0; background: var(--paper); }
+
+/* buttons as bracketed words; hover turns them inverse */
+.chip, .ghost, .primary, form button {
+  font: 11px/14px var(--mono); background: transparent; color: var(--ink); border: 0; padding: 0 2px; outline: 0;
+  text-transform: uppercase;
+}
+.chip::before, .ghost::before, .primary::before { content: "[ "; } .chip::after, .ghost::after, .primary::after { content: " ]"; }
+.chip:hover, .ghost:hover, .primary:hover, form button:hover { background: var(--ink); color: var(--paper); }
+.chip.see::before, .chip.see::after { content: ""; }
+.chip.edit { color: var(--g2); }
+.chips { gap: 4px 10px; }
+.src { color: var(--g2); }
+details summary { color: var(--g2); }
+.list button { text-decoration: none; text-transform: uppercase; }
+.list button::before { content: "› "; }
+.list .first { font-size: 11px; color: var(--g2); }
+
+/* ---- bottom: shortcuts as bracketed words, then the command line -------- */
+form { background: var(--paper); border-top: 3px double var(--ink); padding: 6px 0 calc(6px + env(safe-area-inset-bottom, 0px)); }
+#shortcuts { margin: 0 auto 4px; gap: 0 12px; }
+#shortcuts .chip { flex: none; }
+form > .wrap:last-child { align-items: center; }
+form > .wrap:last-child::before { content: "C:\\>"; }
+#q { font: 16.5px var(--mono); background: transparent; border: 0; padding: 6px 4px; color: var(--ink); }
+#q:focus { outline: 0; }
+form > .wrap:last-child button { background: var(--ink); color: var(--paper); padding: 2px 8px; }
+form > .wrap:last-child button::before { content: "↵ "; }
+
+/* ---- picture tool and editor -------------------------------------------- */
+.tool label, .ed-label { font-size: 11px; color: var(--ink); text-transform: uppercase; }
+.tool select, .tool input, .sheet input[type=text], .sheet textarea, .sheet select {
+  font: 11px/14px var(--mono); background: var(--paper); color: var(--ink); border: 1px solid var(--g2);
+}
+.sheet input:focus, .sheet textarea:focus, .sheet select:focus { outline: 0; border-color: var(--ink); background: var(--paper); }
+pre.raw { border: 1px solid var(--ink); background: var(--paper); }
+.sheet { background: var(--paper); }
+.sheet-bar { background: var(--ink); color: var(--paper); border: 0; }
+.sheet-bar .sheet-in { padding-block: 0; }
+.sheet-bar h2 { font-size: 11px; font-weight: normal; color: var(--paper); text-transform: uppercase; }
+.sheet-bar .ghost { color: var(--paper); }
+.sheet-grid { border: 3px double var(--ink); margin: 14px auto; padding: 14px; }
+.ed-group { border: 1px solid var(--ink); padding: 10px 12px 12px; }
+.ed-group legend { font-size: 11px; color: var(--ink); padding: 0 4px; }
+.ed-group legend::before { content: "┤ "; } .ed-group legend::after { content: " ├"; }
+.ed-hint { font-size: 11px; line-height: 14px; color: var(--g2); }
+.ed-panel h3 { font-size: 11px; color: var(--ink); }
+.ed-panel h3::before { content: "── "; }
+.ed-result, .ed-checks, .ed-status { font-size: 11px; line-height: 14px; }
+.ed-result.c-ok { background: var(--g1); color: var(--ink); }
+.ed-result.c-warn { background: var(--paper); color: var(--ink); border: 1px solid var(--g2); }
+.ed-result.c-bad { background: var(--ink); color: var(--paper); }
+.ed-checks li.c-ok, .ed-checks li.c-warn, .ed-checks li.c-bad { color: var(--ink); }
+.ed-raw pre { background: var(--paper); border: 1px solid var(--g2); }
+.drop { outline: 3px double var(--ink); }
+
+/* pictures: grey, and a light silhouette in dark mode */
+figure.pic img, figure.pic canvas, .tool .views canvas, .ed-picture img { filter: grayscale(1); }
+:root[data-theme="dark"] figure.pic img, :root[data-theme="dark"] figure.pic canvas,
+:root[data-theme="dark"] .tool .views canvas, :root[data-theme="dark"] .ed-picture img { filter: grayscale(1) invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) figure.pic img, :root:not([data-theme="light"]) figure.pic canvas,
+  :root:not([data-theme="light"]) .tool .views canvas, :root:not([data-theme="light"]) .ed-picture img { filter: grayscale(1) invert(1); }
+}
